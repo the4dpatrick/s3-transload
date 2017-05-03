@@ -1,7 +1,5 @@
 ## s3-transload
 
-[![NPM](https://nodei.co/npm/s3-transload.png)](https://nodei.co/npm/s3-transload/)
-
 A module that pipe network file into AWS S3.
 
 ### What this module do?
@@ -12,12 +10,11 @@ A module that pipe network file into AWS S3.
 ## Example
 
 ```js
+const AWS = require('aws-sdk');
+const s3Transload = require('s3-transload');
 
-var AWS         = require('aws-sdk'),
-    s3Transload = require('s3-transload');
-
-// setup S3 credential 
-var credentials = new AWS.SharedIniFileCredentials({profile: 'your-profile'});
+// setup S3 credential
+const credentials = new AWS.Credentials(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
 AWS.config.credentials = credentials;
 
 //url to get the resource
