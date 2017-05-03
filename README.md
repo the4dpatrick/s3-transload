@@ -14,15 +14,14 @@ const AWS = require('aws-sdk');
 const s3Transload = require('s3-transload');
 
 // setup S3 credential
-const credentials = new AWS.Credentials(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-AWS.config.credentials = credentials;
+const credentials = new AWS.Credentials(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY);
 
 //url to get the resource
 var getUrl = "http://path/to/the/resource";
 
 s3Transload.urlToS3(getUrl, 'your-bucket-name', 'your-item-key', function(error, data) {
-	if (error) return console.log(error);
-	console.log("The resource URL on S3 is:", data);
+  if (error) return console.log(error);
+  console.log("The resource URL on S3 is:", data);
 });
 ```
 
