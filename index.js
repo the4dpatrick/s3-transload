@@ -7,7 +7,6 @@ function uploadToS3(s3, cb) {
   var params = {Body: pass};
   s3.upload(params)
     .send(function(err, data) {
-      // console.log(err, data)
       if (err) {
         cb(err, data);
       }
