@@ -22,6 +22,8 @@ function uploadToS3(s3, params, cb) {
 /**
  * Curry callback function with content length and type
  * @param {function} originalCallback - callback accepting err & data args
+ * @param {string} contentLength - Size of the body in bytes. This parameter is useful when the size of the body cannot be determined automatically.
+ * @param {string} contentType -  A standard MIME type describing the format of the object data.
  * @return {function} - curried callback function returning object w/ data
  */
 function curryCallback(originalCallback, contentLength, contentType) {
@@ -53,38 +55,34 @@ function curryCallback(originalCallback, contentLength, contentType) {
  * @callback callback function(err, data)
  *   @param err [Error] an error or null if no error occurred.
  *   @param data [map] The response data from the successful upload:
- *   @param data.Location [String] the URL of the uploaded object
- *   @param data.ETag [String] the ETag of the uploaded object
- *   @param data.Bucket [String]  the bucket to which the object was uploaded
- *   @param data.Key [String] the key to which the object was uploaded
+ *   @param data.location [String] the URL of the uploaded object
+ *   @param {string} data.contentLength - Size of the body in bytes. This parameter is useful when the size of the body cannot be determined automatically.
+ *   @param {string} data.contentType -  A standard MIME type describing the format of the object data.
  */
-exports.urlToS3 = function(url, bucketName, itemKey, uploadParams, callback) {
-  if (typeof uploadParams === 'function' && callback === undefined)  {
-    callback = uploadParams;
-    uploadParams = null;
+exports.urlToS3 = function(url, bucketName, itemKey, params, callback) {
+  if (typeof params === 'function' && callback === undefined)  {
+    callback = params;
+    params = null;
   }
 
-  var s3 = new AWS.S3({
-    params: {
-      Bucket: bucketName,
-      Key: itemKey
-    },
-    apiVersion: '2006-03-01'
-  });
   var req = request.get(url);
   req.pause();
   req.on('response', function(res) {
     if (res.statusCode == 200) {
+      var s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+
       var contentLength = res.headers['content-length'];
       var contentType = res.headers['content-type'];
       var ccb = curryCallback(callback, contentLength, contentType);
 
-      uploadParams = uploadParams || {};
-      uploadParams = Object.assign(uploadParams, {
-        contentLength: contentLength,
-        contentType: contentType,
-      });
-      req.pipe(uploadToS3(s3, uploadParams, ccb));
+      params = params || {};
+      params = Object.assign({
+        Bucket: bucketName,
+        Key: itemKey,
+        ContentLength: contentLength,
+        ContentType: contentType,
+      }, params);
+      req.pipe(uploadToS3(s3, params, ccb));
       req.resume();
     } else {
       callback(new Error('request item did not respond with HTTP 200'));
